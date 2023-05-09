@@ -22,6 +22,17 @@ namespace Linq2023
             Grouping2();
             Joining();*/
 
+            /*IntroToLINQLambda();
+             * DataSourceLambda();
+             * FilteringLambda();
+             * OrderingLambda();
+             * GroupingLambda();
+             * Grouping2Lambda();
+             *   JoiningLambda();
+             */
+
+            JoiningLambda();
+
             Console.Read();
 
         }
@@ -37,17 +48,36 @@ namespace Linq2023
                 Console.Write("{0,1} ", num);
             }
         }
-        
+        static void IntroToLINQLambda()
+        {
+
+            int[] numbers = new int[7] { 0, 1, 2, 3, 4, 5, 6 };
+            Console.WriteLine("ShowParesLambda");
+            var pares = numbers.Where(x => x % 2 == 0).ToList();
+            foreach (var par in pares) { Console.WriteLine(par); }
+        }
+
         static void DataSource()
         {
             var queryAllCustomers = from cust in context.clientes select cust;
 
-            foreach(var item in queryAllCustomers)
+            foreach (var item in queryAllCustomers)
             {
                 Console.WriteLine(item.NombreCompañia);
             }
         }
-        
+
+        static void DataSourceLambda()
+        {
+            var queryAllCustomers = context.clientes.Select(p => new { p.NombreCompañia}).ToList();
+
+
+            foreach (var item in queryAllCustomers)
+            {
+                Console.WriteLine(item.NombreCompañia);
+            }
+        }
+
         static void Filtering()
         {
             var queryLondonCustomers = from cust in context.clientes
@@ -60,10 +90,20 @@ namespace Linq2023
             }
         }
 
+        static void FilteringLambda()
+        {
+            var queryLondonCustomers = context.clientes.Where(x => x.Ciudad == "Londres").ToList();
+
+            foreach (var item in queryLondonCustomers)
+            {
+                Console.WriteLine(item.Ciudad);
+            }
+        }
+
         static void Ordering()
         {
             var queryLondonCustomers = from cust in context.clientes
-                                       where cust.Ciudad == "London"
+                                       where cust.Ciudad == "Londres"
                                        orderby cust.NombreCompañia ascending
                                        select cust;
 
@@ -72,7 +112,19 @@ namespace Linq2023
                 Console.WriteLine(item.NombreCompañia);
             }
         }
-        
+
+
+        static void OrderingLambda()
+        {
+            var queryLondonCustomers = context.clientes.Where(x => x.Ciudad == "Londres").OrderBy(x => x.NombreCompañia).ToList();
+                                       
+
+            foreach (var item in queryLondonCustomers)
+            {
+                Console.WriteLine(item.NombreCompañia);
+            }
+        }
+
         static void Grouping()
         {
             var queryCustomersByCity = from cust in context.clientes
@@ -82,6 +134,20 @@ namespace Linq2023
             {
                 Console.WriteLine(customerGroup.Key);
                 foreach(clientes customer in customerGroup)
+                {
+                    Console.WriteLine("      {0}", customer.NombreCompañia);
+                }
+            }
+        }
+
+        static void GroupingLambda()
+        {
+            var queryCustomersByCity = context.clientes.GroupBy(x => x.Ciudad).ToList();
+                                    
+            foreach (var customerGroup in queryCustomersByCity)
+            {
+                Console.WriteLine(customerGroup.Key);
+                foreach (clientes customer in customerGroup)
                 {
                     Console.WriteLine("      {0}", customer.NombreCompañia);
                 }
@@ -102,6 +168,16 @@ namespace Linq2023
             }
         }
 
+        static void Grouping2Lambda()
+        {
+            var custQuery = context.clientes.GroupBy(x => x.Ciudad).Where(x => x.Count() > 2 ).OrderBy(x => x.Key).ToList();
+            //var custGroup = custQuery.Where(x => x.Count() > 2).OrderBy(x => x.Key).ToList();
+            foreach (var item in custQuery)
+            {
+                Console.WriteLine(item.Key);
+            }
+        }
+
         static void Joining()
         {
             var innerJoinQuery = from cust in context.clientes
@@ -114,35 +190,13 @@ namespace Linq2023
             }
         }
 
-
-        private static void ShowPares(int[] numbers)
+        static void JoiningLambda()
         {
-            Console.WriteLine("ShowPares");
-            var pares = (from c in numbers
-                         where c % 2 == 0
-                         select c).ToList();
-
-
-            foreach (var par in pares) { Console.WriteLine(par); }
-        }
-        private static void ShowParesLambda(int[] numbers)
-        {
-            Console.WriteLine("ShowParesLambda");
-            var pares = numbers.Where(x => x % 2 == 0).ToList();
-            foreach (var par in pares) { Console.WriteLine(par); }
-        }
-
-        private static void InsertProducts()
-        {
-            string[] basicNeeds = { "Leche", "Pan", "Arroz", "Huevos", "Azúcar", "Aceite", "Sal", "Harina", "Pasta", "Jabón", "Papel higiénico", "Detergente", "Cepillo de dientes", "Shampoo", "Cebolla", "Zanahoria", "Papa", "Tomate", "Atún", "Pollo" };
-
-            Random random = new Random();
-            for (int i = 1; i <= 100; i++)
+            var innerJoinQuery = context.clientes.Join(context.Pedidos, cliente => cliente.idCliente, pedido => pedido.IdCliente, (cliente, pedido) => new { CustomerName = cliente.NombreCompañia, DistributorName = pedido.PaisDestinatario }).ToList();
+                 
+            foreach (var item in innerJoinQuery)
             {
-                int productId = i;
-                string name = basicNeeds[random.Next(0, basicNeeds.Length)];
-                int price = random.Next(10, 100); // Genera un precio aleatorio entre 10 y 100
-                products.Add(new Product { ProductId = productId, Name = name, Price = price });
+                Console.WriteLine(item.CustomerName);
             }
         }
 
